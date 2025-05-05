@@ -90,7 +90,7 @@ export default function ScheduledExamsPage() {
 
   return (
     <DashboardLayout role="examiner">
-      <div className="container py-8">
+      <div className="container py-8 px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold">Scheduled Exams</h1>
           <Button

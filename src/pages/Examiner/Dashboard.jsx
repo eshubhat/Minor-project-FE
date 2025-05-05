@@ -11,7 +11,7 @@ import { FileText, Users, CheckCircle, Clock } from "lucide-react";
 export default function ExaminerDashboardPage() {
   return (
     <DashboardLayout role="examiner">
-      <div className="container py-8">
+      <div className="container py-8 px-8">
         <h1 className="text-3xl font-bold mb-6">Examiner Dashboard</h1>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -77,7 +77,7 @@ export default function ExaminerDashboardPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">Web Development Fundamentals</p>
+                    <p className="font-medium">Safety Standards</p>
                     <p className="text-sm text-muted-foreground">
                       4 new attempts
                     </p>
@@ -89,9 +89,7 @@ export default function ExaminerDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">
-                      Data Structures and Algorithms
-                    </p>
+                    <p className="font-medium">Registration Licensing</p>
                     <p className="text-sm text-muted-foreground">
                       7 new attempts
                     </p>
@@ -103,7 +101,7 @@ export default function ExaminerDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">Advanced JavaScript Concepts</p>
+                    <p className="font-medium">Compliance with regulations</p>
                     <p className="text-sm text-muted-foreground">
                       2 new attempts
                     </p>
@@ -127,7 +125,7 @@ export default function ExaminerDashboardPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">React Advanced Concepts</p>
+                    <p className="font-medium">Drone Technologies</p>
                     <p className="text-sm text-muted-foreground">
                       Duration: 2 hours
                     </p>
@@ -139,7 +137,7 @@ export default function ExaminerDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">Cloud Computing Basics</p>
+                    <p className="font-medium">Safety Standards</p>
                     <p className="text-sm text-muted-foreground">
                       Duration: 1.5 hours
                     </p>
@@ -151,7 +149,7 @@ export default function ExaminerDashboardPage() {
                 </div>
                 <div className="flex items-center justify-between border-b pb-4">
                   <div>
-                    <p className="font-medium">Database Design Principles</p>
+                    <p className="font-medium">Registration Licensing</p>
                     <p className="text-sm text-muted-foreground">
                       Duration: 2 hours
                     </p>

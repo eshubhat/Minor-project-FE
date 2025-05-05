@@ -25,7 +25,7 @@ export default function SignupPage() {
             Create an account
           </h1>
           <p className="text-sm text-muted-foreground">
-            Sign up to get started with QuizGenius
+            Sign up to get started with Drone Certification Portal
           </p>
         </div>
         <Card>

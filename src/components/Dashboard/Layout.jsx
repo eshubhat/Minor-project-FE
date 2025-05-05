@@ -29,7 +29,7 @@ export function DashboardLayout({ children, role = "examiner" }) {
                   onClick={() => setOpen(false)}
                 >
                   <BookOpen className="h-6 w-6 text-teal-600" />
-                  <span className="font-bold">QuizGenius</span>
+                  <span className="font-bold">DCP</span>
                 </Link>
                 <div className="mt-8">
                   <DashboardNav role={role} mobile={true} setOpen={setOpen} />
@@ -39,7 +39,7 @@ export function DashboardLayout({ children, role = "examiner" }) {
             <Link href="/" className="flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-teal-600" />
               <span className="hidden font-bold md:inline-block">
-                QuizGenius
+                DCP
               </span>
             </Link>
           </div>

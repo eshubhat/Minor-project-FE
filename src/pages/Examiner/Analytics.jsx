@@ -61,7 +61,7 @@ const timeSpentData = [
 export default function AnalyticsPage() {
   return (
     <DashboardLayout role="examiner">
-      <div className="container py-8">
+      <div className="container py-8 px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold">Analytics</h1>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -71,11 +71,11 @@ export default function AnalyticsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Exams</SelectItem>
-                <SelectItem value="web-dev">Web Development</SelectItem>
-                <SelectItem value="javascript">JavaScript</SelectItem>
-                <SelectItem value="react">React</SelectItem>
-                <SelectItem value="nodejs">Node.js</SelectItem>
-                <SelectItem value="database">Database</SelectItem>
+                <SelectItem value="web-dev">Safety Standards</SelectItem>
+                <SelectItem value="javascript">Security Compliance</SelectItem>
+                <SelectItem value="react">Registration Licensing</SelectItem>
+                <SelectItem value="nodejs">Testing Regulations</SelectItem>
+                <SelectItem value="database">Legal Aspects</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,33 +1,46 @@
-import { BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ThemeToggle from "./ThemeToggle";
 
-export default function MainNav() {
+export function MainNav() {
+  const navigate = useNavigate();
   return (
-    <div className="flex gap-6 md:gap-10">
-      <Link href="/" className="flex items-center space-x-2">
-        <BookOpen className="h-6 w-6 text-teal-600" />
-        <span className="hidden font-bold sm:inline-block">QuizGenius</span>
-      </Link>
-      <nav className="flex gap-6">
-        <Link
-          href="/features"
-          className="flex items-center text-sm font-medium text-muted-foreground"
-        >
-          Features
-        </Link>
-        <Link
-          href="/pricing"
-          className="flex items-center text-sm font-medium text-muted-foreground"
-        >
-          Pricing
-        </Link>
-        <Link
-          href="/about"
-          className="flex items-center text-sm font-medium text-muted-foreground"
-        >
-          About
-        </Link>
-      </nav>
+    <div className="flex w-full items-center justify-between py-4 px-4">
+      <div className="flex gap-6 md:gap-10">
+        <div href="/" className="flex items-center space-x-2">
+          <Activity className="h-6 w-6 text-teal-600" />
+          <span className="hidden font-bold sm:inline-block">
+            ExamTelemetry
+          </span>
+        </div>
+        <nav className="hidden md:flex gap-6">
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center text-sm font-medium text-muted-foreground"
+          >
+            Candidate
+          </div>
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center text-sm font-medium text-muted-foreground"
+          >
+            Review
+          </div>
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center text-sm font-medium text-muted-foreground"
+          >
+            Analytics
+          </div>
+        </nav>
+      </div>
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <Button asChild className="hidden md:flex">
+          <div onClick={() => navigate("/")}>Login</div>
+        </Button>
+      </div>
     </div>
   );
 }

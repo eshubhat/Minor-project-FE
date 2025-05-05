@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "../../components/Dashboard/Layout";
 import {
   Card,
@@ -35,6 +35,30 @@ export default function CreateExamPage() {
       ],
     },
   ]);
+
+  const [examDetails, setExamDetails] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    passScore: "",
+    startTime: "",
+    endTime: "",
+    maxAttempts: "1",
+  });
+
+  const [activeTab, setActiveTab] = useState("details");
+
+  // useEffect(() => {
+  //   const FetchExamList = async () => {
+  //     const response = await axios.get(
+  //       `${import.meta.env.VITE_BACKEND_URL}/teacher/fetchExams/teacher1`
+  //     );
+
+  //     setExams(response.data.exams);
+  //     console.log(response.data.exams);
+  //   };
+  //   FetchExamList();
+  // }, []);
 
   const addQuestion = () => {
     setQuestions([
@@ -77,12 +101,61 @@ export default function CreateExamPage() {
     setQuestions(newQuestions);
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setExamDetails((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCreateExam = async () => {
+    const formattedQuestions = questions.map((q) => ({
+      question: q.text,
+      options: q.options.map((opt) => opt.text),
+      correctOption: q.options.findIndex((opt) => opt.isCorrect),
+    }));
+
+    const payload = {
+      title: examDetails.title,
+      teacher: "demo",
+      questions: formattedQuestions,
+      description: examDetails.description,
+      passScore: examDetails.passScore,
+      duration: examDetails.duration,
+    };
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}teacher/createExam`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Exam created successfully!");
+        console.log("Saved exam:", data.exam);
+      } else {
+        console.error("Error:", data.message);
+      }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
   return (
     <DashboardLayout role="examiner">
-      <div className="container py-8">
+      <div className="container py-8 px-8">
         <h1 className="text-3xl font-bold mb-6">Create Exam</h1>
 
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="questions">Questions</TabsTrigger>
@@ -102,6 +175,9 @@ export default function CreateExamPage() {
                   <Label htmlFor="title">Exam Title</Label>
                   <Input
                     id="title"
+                    name="title"
+                    value={examDetails.title}
+                    onChange={handleInputChange}
                     placeholder="e.g. Web Development Fundamentals"
                   />
                 </div>
@@ -109,6 +185,9 @@ export default function CreateExamPage() {
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
+                    name="description"
+                    value={examDetails.description}
+                    onChange={handleInputChange}
                     placeholder="Provide a description of the exam"
                     rows={4}
                   />
@@ -119,6 +198,9 @@ export default function CreateExamPage() {
                     <Input
                       id="duration"
                       type="number"
+                      name="duration"
+                      value={examDetails.duration}
+                      onChange={handleInputChange}
                       min="1"
                       placeholder="e.g. 60"
                     />
@@ -128,6 +210,9 @@ export default function CreateExamPage() {
                     <Input
                       id="pass-score"
                       type="number"
+                      name="passScore"
+                      value={examDetails.passScore}
+                      onChange={handleInputChange}
                       min="1"
                       max="100"
                       placeholder="e.g. 70"
@@ -137,7 +222,9 @@ export default function CreateExamPage() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline">Save as Draft</Button>
-                <Button>Continue to Questions</Button>
+                <Button onClick={() => setActiveTab("questions")}>
+                  Continue to Questions
+                </Button>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -228,8 +315,15 @@ export default function CreateExamPage() {
               </Button>
 
               <div className="flex justify-between mt-6">
-                <Button variant="outline">Back to Details</Button>
-                <Button>Continue to Schedule</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab("details")}
+                >
+                  Back to Details
+                </Button>
+                <Button onClick={() => setActiveTab("schedule")}>
+                  Continue to Schedule
+                </Button>
               </div>
             </div>
           </TabsContent>
@@ -269,11 +363,21 @@ export default function CreateExamPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="start-time">Start Time</Label>
-                    <Input id="start-time" type="time" />
+                    <Input
+                      id="start-time"
+                      type="time"
+                      value={examDetails.startTime}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="end-time">End Time</Label>
-                    <Input id="end-time" type="time" />
+                    <Input
+                      id="end-time"
+                      type="time"
+                      value={examDetails.endTime}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
 
@@ -285,13 +389,24 @@ export default function CreateExamPage() {
                     id="max-attempts"
                     type="number"
                     min="1"
+                    name="maxAttempts"
+                    value={examDetails.maxAttempts}
+                    onChange={handleInputChange}
                     defaultValue="1"
                   />
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline">Back to Questions</Button>
-                <Button className="bg-teal-600 hover:bg-teal-700">
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab("questions")}
+                >
+                  Back to Questions
+                </Button>
+                <Button
+                  onClick={handleCreateExam}
+                  className="bg-teal-600 hover:bg-teal-700"
+                >
                   Create Exam
                 </Button>
               </CardFooter>
