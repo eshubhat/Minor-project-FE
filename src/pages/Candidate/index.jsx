@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { examService } from "@/services/ExamServices";
 
 export default function CandidateExamPage() {
@@ -27,8 +37,188 @@ export default function CandidateExamPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submissionId, setSubmissionId] = useState(null);
-  const [questionStartTime, setQuestionStartTime] = useState(null); // track when current question started
-  const [timePerQuestion, setTimePerQuestion] = useState({}); // store time taken for each question
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+  const [timePerQuestion, setTimePerQuestion] = useState({});
+  const [showExitWarning, setShowExitWarning] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [shouldForceRestart, setShouldForceRestart] = useState(false);
+
+  // Remove the old useEffect and replace with this corrected version
+  // Replace the existing useEffect with visibility change handler with this:
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && currentStep === "exam") {
+        // Check if we're still in fullscreen - if yes, then it's tab switching
+        const isCurrentlyFullscreen =
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement ||
+          document.msFullscreenElement;
+
+        setShowExitWarning(true);
+        // Force restart if still in fullscreen (meaning tab switch)
+        // OR if warning is already showing but user switched tabs anyway
+        setShouldForceRestart(!!isCurrentlyFullscreen || showExitWarning);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (currentStep === "exam") {
+        // Check if we're still in fullscreen
+        const isCurrentlyFullscreen =
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement ||
+          document.msFullscreenElement;
+
+        setShowExitWarning(true);
+        // Force restart if still in fullscreen (meaning focus lost while in fullscreen)
+        // OR if warning is already showing but user lost focus anyway
+        setShouldForceRestart(!!isCurrentlyFullscreen || showExitWarning);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [currentStep, showExitWarning]); // Add showExitWarning to dependencies
+
+  useEffect(() => {
+    if (currentStep === "completed") {
+      navigate(`/`);
+    }
+  }, [currentStep, submissionId, navigate]);
+
+  // Fullscreen event listeners
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+
+      setIsFullscreen(!!isCurrentlyFullscreen);
+
+      // Only show warning if fullscreen was exited unexpectedly during exam
+      if (
+        !isCurrentlyFullscreen &&
+        currentStep === "exam" &&
+        !showExitWarning
+      ) {
+        setShowExitWarning(true);
+        // Don't force restart for just exiting fullscreen
+        setShouldForceRestart(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      // Prevent common shortcuts during exam
+      if (currentStep === "exam") {
+        if (
+          e.key === "Escape" ||
+          e.key === "F11" ||
+          (e.altKey && e.key === "Tab") ||
+          (e.ctrlKey && (e.key === "w" || e.key === "t" || e.key === "n")) ||
+          (e.metaKey && (e.key === "w" || e.key === "t" || e.key === "n"))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowExitWarning(true);
+
+          // Force restart for keyboard shortcuts that could be used to cheat
+          if (
+            (e.altKey && e.key === "Tab") ||
+            (e.ctrlKey && (e.key === "w" || e.key === "t" || e.key === "n")) ||
+            (e.metaKey && (e.key === "w" || e.key === "t" || e.key === "n"))
+          ) {
+            setShouldForceRestart(true);
+          } else {
+            // For ESC and F11, don't force restart (just exiting fullscreen)
+            setShouldForceRestart(false);
+          }
+        }
+      }
+    };
+
+    // Add event listeners with capture phase for keydown to catch before default behavior
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
+    document.addEventListener("keydown", handleKeyDown, true); // Use capture phase
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "mozfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [currentStep, showExitWarning]);
+
+  // Enter fullscreen
+  const enterFullscreen = () => {
+    const element = document.documentElement;
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen();
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen();
+    }
+  };
+
+  // Exit fullscreen
+  const exitFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  };
+
+  // Handle exit warning actions
+  const handleContinueExam = () => {
+    setShowExitWarning(false);
+    setShouldForceRestart(false); // Reset the flag
+    if (!isFullscreen) {
+      enterFullscreen();
+    }
+  };
+
+  const handleRestartExam = () => {
+    exitFullscreen();
+    setShowExitWarning(false);
+    setShouldForceRestart(false); // Reset the flag
+    setCurrentStep("start");
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setQuestions([]);
+    setTimePerQuestion({});
+    setCandidateName("");
+    setCandidateEmail("");
+    setDroneType("");
+  };
 
   // Get drone types
   const droneTypes = examService.getDroneTypes();
@@ -44,11 +234,11 @@ export default function CandidateExamPage() {
       setNameError("");
     }
 
-    if(!candidateEmail.trim()) {
-      setEmailError("Please enter your email to continue")
-    }
-    else {
-      setEmailError("")
+    if (!candidateEmail.trim()) {
+      setEmailError("Please enter your email to continue");
+      hasError = true;
+    } else {
+      setEmailError("");
     }
 
     if (!droneType) {
@@ -71,7 +261,7 @@ export default function CandidateExamPage() {
           body: JSON.stringify({
             candidateName,
             droneType,
-            numberOfQuestions: 10, // you can change as needed
+            numberOfQuestions: 10,
           }),
         }
       );
@@ -81,18 +271,19 @@ export default function CandidateExamPage() {
       }
 
       const data = await response.json();
-      setQuestions(data.questions?.slice(0, 10)); // assuming backend sends { questions: [...] }
+      setQuestions(data.questions?.slice(0, 10));
       console.log(data.questions?.slice(0, 10));
       setCurrentStep("exam");
+      setQuestionStartTime(Date.now());
+
+      // Enter fullscreen when exam starts
+      setTimeout(() => {
+        enterFullscreen();
+      }, 100);
     } catch (error) {
       console.error(error);
       alert("Something went wrong while starting the exam.");
     }
-
-    // Get random questions for the selected drone type
-    // const randomQuestions = questions[10];
-    // setQuestions(randomQuestions);
-    // setCurrentStep("exam");
   };
 
   const handleAnswerChange = (value) => {
@@ -185,6 +376,8 @@ export default function CandidateExamPage() {
         if (data.success) {
           setSubmissionId(data.submissionId);
           setCurrentStep("completed");
+          // Exit fullscreen when exam is completed
+          exitFullscreen();
         } else {
           alert("Failed to submit exam. Please try again.");
         }
@@ -214,14 +407,14 @@ export default function CandidateExamPage() {
             {nameError && <p className="text-sm text-red-500">{nameError}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="name">Email</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="name"
+              id="email"
               value={candidateEmail}
               onChange={(e) => setCandidateEmail(e.target.value)}
-              placeholder="Enter your full name"
+              placeholder="Enter your email"
             />
-            {nameError && <p className="text-sm text-red-500">{nameError}</p>}
+            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
 
           <div className="grid gap-2">
@@ -252,12 +445,21 @@ export default function CandidateExamPage() {
         </div>
       </CardContent>
       <CardFooter>
-        <Button
-          onClick={startExam}
-          className="w-full bg-teal-600 hover:bg-teal-700"
-        >
-          Start Exam
-        </Button>
+        <div className="w-full space-y-4">
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
+              <strong>Important:</strong> The exam will start in fullscreen
+              mode. Attempting to exit fullscreen or switch tabs will trigger a
+              warning and may require you to restart the exam.
+            </p>
+          </div>
+          <Button
+            onClick={startExam}
+            className="w-full bg-teal-600 hover:bg-teal-700"
+          >
+            Start Exam
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
@@ -279,9 +481,16 @@ export default function CandidateExamPage() {
                   Exam Type: {droneTypes.find((t) => t.id === droneType)?.name}
                 </CardDescription>
               </div>
-              <span className="text-sm text-muted-foreground">
-                Progress: {Math.round(progress)}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Progress: {Math.round(progress)}%
+                </span>
+                {isFullscreen && (
+                  <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                    Fullscreen Active
+                  </span>
+                )}
+              </div>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
               <div
@@ -389,6 +598,48 @@ export default function CandidateExamPage() {
       {currentStep === "start" && renderStartScreen()}
       {currentStep === "exam" && renderExamScreen()}
       {currentStep === "completed" && renderCompletedScreen()}
+
+      {/* Exit Warning Dialog */}
+      <AlertDialog open={showExitWarning} onOpenChange={setShowExitWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>⚠️ Exam Security Warning</AlertDialogTitle>
+            <AlertDialogDescription className={"text-black"}>
+              You have attempted to exit the fullscreen mode or navigate away
+              from the exam. This is not allowed during the examination process.
+              <br />
+              <br />
+              {shouldForceRestart ? (
+                "You attempted to navigate away from the exam. Restarting the exam is the only option."
+              ) : (
+                <>
+                  If the screen has come out of the fullscreen then you have two
+                  options:
+                  <br />
+                  • Continue the exam in fullscreen mode
+                  <br />• Restart the exam from the beginning
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {shouldForceRestart ? (
+              <AlertDialogAction onClick={handleRestartExam}>
+                Restart Exam
+              </AlertDialogAction>
+            ) : (
+              <>
+                <AlertDialogCancel onClick={handleRestartExam}>
+                  Restart Exam
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleContinueExam}>
+                  Continue Exam
+                </AlertDialogAction>
+              </>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

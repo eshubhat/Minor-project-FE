@@ -38,6 +38,56 @@ export default function ReviewSubmissionPage({ params }) {
   const [droneTypes, setDroneTypes] = useState([]);
 
   useEffect(() => {
+    const FetchExamSubmissionDetails = async () => {
+      // Check if submissionId is provided
+      if (!submissionId) {
+        navigate("/examiner/review");
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:3000/teacher/submission/${submissionId}`,{
+          
+        }
+      );
+
+      // Fetch submission data
+      const submissionData = examService.getSubmissionById(submissionId);
+      if (submissionData) {
+        setSubmission(submissionData);
+
+        // Initialize scores from existing data or set to 0
+        const initialScores = {};
+        submissionData.answers.forEach((answer) => {
+          initialScores[answer.questionId] =
+            submissionData.scores?.[answer.questionId] || 0;
+        });
+        setScores(initialScores);
+
+        // Calculate total score
+        if (submissionData.scores) {
+          const total = Object.values(submissionData.scores).reduce(
+            (sum, score) => sum + score,
+            0
+          );
+          setTotalScore(total);
+        }
+
+        // Fetch questions for the specific drone type
+        const allQuestions = examService.getRandomQuestions(
+          submissionData.droneType,
+          20
+        ); // Get all questions
+        setQuestions(allQuestions);
+
+        // Get drone types
+        setDroneTypes(examService.getDroneTypes());
+      }
+
+      // Fetch telemetry data
+      const telemetry = telemetryService.getTelemetryData(submissionId);
+      setTelemetryData(telemetry);
+    };
     // Fetch submission data
     const submissionData = examService.getSubmissionById(submissionId);
     if (submissionData) {

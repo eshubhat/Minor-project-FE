@@ -15,6 +15,7 @@ import UploadTelemetryPage from "./pages/Candidate/UploadTelemetry";
 import ExaminerReviewPage from "./pages/Examiner";
 import ReviewSubmissionPage from "./pages/Examiner/ReviewSubmission";
 import AnalyticsPage from "./pages/Examiner/Analytics-page";
+import DronePathCesium from "./pages/DroneSimulation";
 
 function App() {
   return (
@@ -27,13 +28,14 @@ function App() {
           {/**Examiners Route */}
           <Route path="/examiner" element={<ExaminerReviewPage />} />
           <Route path="/examiner/review" element={<ExaminerReviewPage />} />
+          <Route path="/examiner/addQuestion" element={<CreateExamPage />} />
           <Route
             path="/examiner/review/:id"
             element={<ReviewSubmissionPage />}
           />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/dashboard" element={<ExaminerDashboardPage />} />
-          <Route path="/create-exam" element={<CreateExamPage />} />
+          {/* <Route path="/create-exam" element={<CreateExamPage />} /> */}
           {/* <Route path="/analytics" element={<AnalyticsPage />} /> */}
           <Route path="/candidates" element={<CandidatesPage />} />
           <Route path="/scheduled-exams" element={<ScheduledExamsPage />} />
@@ -51,6 +53,9 @@ function App() {
           <Route path="/candidate/compare" element={<ComparePage />} />
           <Route path="/candidate/results" element={<ResultsPage />} />
           <Route path="/candidate/:id" element={<ResultsPage />} />
+
+          {/**Testing Routes */}
+          <Route path="/test" element={<DronePathCesium />} />
         </Routes>
       </BrowserRouter>
     </>

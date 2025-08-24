@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
-import { DashboardLayout } from "../../components/Dashboard/Layout";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -12,65 +11,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Plus, Trash2 } from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Trash2, Save } from "lucide-react";
+import axios from "axios";
 
-export default function CreateExamPage() {
-  const [date, setDate] = useState(null);
+export default function DroneExamCreator() {
+  const [examType, setExamType] = useState("");
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([
     {
-      text: "",
-      options: [
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-      ],
+      question: "",
+      options: ["", ""],
+      correctOption: 0,
+      droneType: "",
+      difficulty: "medium",
+      tags: [],
+      isActive: true,
     },
   ]);
 
-  const [examDetails, setExamDetails] = useState({
-    title: "",
-    description: "",
-    duration: "",
-    passScore: "",
-    startTime: "",
-    endTime: "",
-    maxAttempts: "1",
-  });
+  const droneTypes = [
+    { value: "micro", label: "Micro Drone" },
+    { value: "small", label: "Small Drone" },
+    { value: "medium", label: "Medium Drone" },
+    { value: "large", label: "Large Drone" },
+  ];
 
-  const [activeTab, setActiveTab] = useState("details");
-
-  // useEffect(() => {
-  //   const FetchExamList = async () => {
-  //     const response = await axios.get(
-  //       `${import.meta.env.VITE_BACKEND_URL}/teacher/fetchExams/teacher1`
-  //     );
-
-  //     setExams(response.data.exams);
-  //     console.log(response.data.exams);
-  //   };
-  //   FetchExamList();
-  // }, []);
+  const difficulties = [
+    { value: "easy", label: "Easy" },
+    { value: "medium", label: "Medium" },
+    { value: "hard", label: "Hard" },
+  ];
 
   const addQuestion = () => {
     setQuestions([
       ...questions,
       {
-        text: "",
-        options: [
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-        ],
+        question: "",
+        options: ["", ""],
+        correctOption: 0,
+        droneType: examType,
+        difficulty: "medium",
+        tags: [],
+        isActive: true,
       },
     ]);
   };
@@ -81,339 +70,307 @@ export default function CreateExamPage() {
     }
   };
 
-  const updateQuestion = (index, text) => {
+  const updateQuestion = (index, field, value) => {
     const newQuestions = [...questions];
-    newQuestions[index].text = text;
+    newQuestions[index][field] = value;
     setQuestions(newQuestions);
   };
 
-  const updateOption = (questionIndex, optionIndex, text) => {
+  const updateOption = (questionIndex, optionIndex, value) => {
     const newQuestions = [...questions];
-    newQuestions[questionIndex].options[optionIndex].text = text;
+    newQuestions[questionIndex].options[optionIndex] = value;
     setQuestions(newQuestions);
+  };
+
+  const addOption = (questionIndex) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].options.push("");
+    setQuestions(newQuestions);
+  };
+
+  const removeOption = (questionIndex, optionIndex) => {
+    const newQuestions = [...questions];
+    if (newQuestions[questionIndex].options.length > 2) {
+      newQuestions[questionIndex].options.splice(optionIndex, 1);
+      // Adjust correct option if needed
+      if (newQuestions[questionIndex].correctOption >= optionIndex) {
+        newQuestions[questionIndex].correctOption = Math.max(
+          0,
+          newQuestions[questionIndex].correctOption - 1
+        );
+      }
+      setQuestions(newQuestions);
+    }
   };
 
   const setCorrectOption = (questionIndex, optionIndex) => {
     const newQuestions = [...questions];
-    newQuestions[questionIndex].options.forEach((option, i) => {
-      option.isCorrect = i === optionIndex;
-    });
+    newQuestions[questionIndex].correctOption = optionIndex;
     setQuestions(newQuestions);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setExamDetails((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const updateTags = (questionIndex, tagsString) => {
+    const newQuestions = [...questions];
+    newQuestions[questionIndex].tags = tagsString
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+    setQuestions(newQuestions);
   };
 
-  const handleCreateExam = async () => {
-    const formattedQuestions = questions.map((q) => ({
-      question: q.text,
-      options: q.options.map((opt) => opt.text),
-      correctOption: q.options.findIndex((opt) => opt.isCorrect),
+  const handleSaveExam = async () => {
+    // Validate that all questions have the same drone type as exam type
+    const validatedQuestions = questions.map((q) => ({
+      ...q,
+      droneType: examType,
+      options: q.options.filter((opt) => opt.trim() !== ""), // Remove empty options
     }));
 
+    // Basic validation
+    if (!examType) {
+      alert("Please select an exam type");
+      return;
+    }
+
+    const invalidQuestions = validatedQuestions.filter(
+      (q) =>
+        !q.question.trim() ||
+        q.options.length < 2 ||
+        q.options.some((opt) => !opt.trim()) ||
+        q.correctOption >= q.options.length
+    );
+
+    if (invalidQuestions.length > 0) {
+      alert(
+        "Please complete all questions with at least 2 non-empty options and valid correct answers"
+      );
+      return;
+    }
+
     const payload = {
-      title: examDetails.title,
-      teacher: "demo",
-      questions: formattedQuestions,
-      description: examDetails.description,
-      passScore: examDetails.passScore,
-      duration: examDetails.duration,
+      examType,
+      questions: validatedQuestions,
     };
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}teacher/createExam`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
+      // Replace with your actual API endpoint
+      const response = await axios.post(
+        "http://localhost:3000/teacher/createQuestion",
+        payload,
       );
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (response.status === 201) {
         alert("Exam created successfully!");
-        console.log("Saved exam:", data.exam);
+        navigate("/");
+        console.log("Exam saved:", payload);
       } else {
-        console.error("Error:", data.message);
+        console.error("Failed to create questions:", response);
+        alert("Failed to create questions. Please try again.");
       }
     } catch (error) {
-      console.error("Fetch failed:", error);
+      console.error("Error saving exam:", error);
+      alert("Error creating questions");
     }
   };
 
   return (
-    <DashboardLayout role="examiner">
-      <div className="container py-8 px-8">
-        <h1 className="text-3xl font-bold mb-6">Create Exam</h1>
+    <div className="container max-w-4xl mx-auto py-8 px-4">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Create Drone Questions</h1>
+        <p className="text-gray-600">
+          Create questions for drone certification exams
+        </p>
+      </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="questions">Questions</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          </TabsList>
+      {/* Exam Type Selection */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Exam Type</CardTitle>
+          <CardDescription>Select the type of drone exam</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2">
+            <Label htmlFor="exam-type">Drone Type</Label>
+            <Select value={examType} onValueChange={setExamType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select drone type" />
+              </SelectTrigger>
+              <SelectContent>
+                {droneTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
-          <TabsContent value="details">
-            <Card>
-              <CardHeader>
-                <CardTitle>Exam Details</CardTitle>
-                <CardDescription>
-                  Set the basic information for your exam
-                </CardDescription>
+      {/* Questions Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold">Questions</h2>
+          <Button onClick={addQuestion} disabled={!examType}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Question
+          </Button>
+        </div>
+
+        {!examType && (
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-center text-gray-500">
+                Please select an exam type first
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {examType &&
+          questions.map((question, questionIndex) => (
+            <Card key={questionIndex}>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle>Question {questionIndex + 1}</CardTitle>
+                  <CardDescription>
+                    {examType.charAt(0).toUpperCase() + examType.slice(1)} Drone
+                    Question
+                  </CardDescription>
+                </div>
+                {questions.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeQuestion(questionIndex)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Question Text */}
                 <div className="grid gap-2">
-                  <Label htmlFor="title">Exam Title</Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={examDetails.title}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Web Development Fundamentals"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor={`question-${questionIndex}`}>Question</Label>
                   <Textarea
-                    id="description"
-                    name="description"
-                    value={examDetails.description}
-                    onChange={handleInputChange}
-                    placeholder="Provide a description of the exam"
-                    rows={4}
+                    id={`question-${questionIndex}`}
+                    placeholder="Enter your question"
+                    value={question.question}
+                    onChange={(e) =>
+                      updateQuestion(questionIndex, "question", e.target.value)
+                    }
                   />
                 </div>
+
+                {/* Difficulty and Tags */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="duration">Duration (minutes)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      name="duration"
-                      value={examDetails.duration}
-                      onChange={handleInputChange}
-                      min="1"
-                      placeholder="e.g. 60"
-                    />
+                    <Label>Difficulty</Label>
+                    <Select
+                      value={question.difficulty}
+                      onValueChange={(value) =>
+                        updateQuestion(questionIndex, "difficulty", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {difficulties.map((diff) => (
+                          <SelectItem key={diff.value} value={diff.value}>
+                            {diff.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="pass-score">Passing Score (%)</Label>
+                    <Label>Tags (comma-separated)</Label>
                     <Input
-                      id="pass-score"
-                      type="number"
-                      name="passScore"
-                      value={examDetails.passScore}
-                      onChange={handleInputChange}
-                      min="1"
-                      max="100"
-                      placeholder="e.g. 70"
+                      placeholder="safety, regulations, flight"
+                      value={question.tags.join(", ")}
+                      onChange={(e) =>
+                        updateTags(questionIndex, e.target.value)
+                      }
                     />
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline">Save as Draft</Button>
-                <Button onClick={() => setActiveTab("questions")}>
-                  Continue to Questions
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="questions">
-            <div className="space-y-6">
-              {questions.map((question, questionIndex) => (
-                <Card key={questionIndex}>
-                  <CardHeader className="flex flex-row items-start justify-between space-y-0">
-                    <div>
-                      <CardTitle>Question {questionIndex + 1}</CardTitle>
-                      <CardDescription>
-                        Define the question and possible answers
-                      </CardDescription>
-                    </div>
-                    {questions.length > 1 && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeQuestion(questionIndex)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor={`question-${questionIndex}`}>
-                        Question
-                      </Label>
-                      <Textarea
-                        id={`question-${questionIndex}`}
-                        placeholder="Enter your question"
-                        value={question.text}
+                {/* Options */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Answer Options</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addOption(questionIndex)}
+                    >
+                      <Plus className="mr-1 h-3 w-3" />
+                      Add Option
+                    </Button>
+                  </div>
+                  {question.options.map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex items-center gap-2">
+                      <Input
+                        placeholder={`Option ${optionIndex + 1}`}
+                        value={option}
                         onChange={(e) =>
-                          updateQuestion(questionIndex, e.target.value)
+                          updateOption(
+                            questionIndex,
+                            optionIndex,
+                            e.target.value
+                          )
                         }
                       />
-                    </div>
-                    <div className="space-y-4">
-                      <Label>Answer Options</Label>
-                      {question.options.map((option, optionIndex) => (
-                        <div
-                          key={optionIndex}
-                          className="flex items-center gap-2"
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          id={`correct-${questionIndex}-${optionIndex}`}
+                          name={`correct-${questionIndex}`}
+                          checked={question.correctOption === optionIndex}
+                          onChange={() =>
+                            setCorrectOption(questionIndex, optionIndex)
+                          }
+                        />
+                        <Label
+                          htmlFor={`correct-${questionIndex}-${optionIndex}`}
+                          className="text-sm"
                         >
-                          <Input
-                            placeholder={`Option ${optionIndex + 1}`}
-                            value={option.text}
-                            onChange={(e) =>
-                              updateOption(
-                                questionIndex,
-                                optionIndex,
-                                e.target.value
-                              )
-                            }
-                          />
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              id={`correct-${questionIndex}-${optionIndex}`}
-                              name={`correct-${questionIndex}`}
-                              checked={option.isCorrect}
-                              onChange={() =>
-                                setCorrectOption(questionIndex, optionIndex)
-                              }
-                            />
-                            <Label
-                              htmlFor={`correct-${questionIndex}-${optionIndex}`}
-                            >
-                              Correct
-                            </Label>
-                          </div>
-                        </div>
-                      ))}
+                          Correct
+                        </Label>
+                      </div>
+                      {question.options.length > 2 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            removeOption(questionIndex, optionIndex)
+                          }
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              <Button
-                onClick={addQuestion}
-                variant="outline"
-                className="w-full"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Question
-              </Button>
-
-              <div className="flex justify-between mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setActiveTab("details")}
-                >
-                  Back to Details
-                </Button>
-                <Button onClick={() => setActiveTab("schedule")}>
-                  Continue to Schedule
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="schedule">
-            <Card>
-              <CardHeader>
-                <CardTitle>Schedule Exam</CardTitle>
-                <CardDescription>
-                  Set when this exam will be available to candidates
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label>Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : "Select a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="start-time">Start Time</Label>
-                    <Input
-                      id="start-time"
-                      type="time"
-                      value={examDetails.startTime}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="end-time">End Time</Label>
-                    <Input
-                      id="end-time"
-                      type="time"
-                      value={examDetails.endTime}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="max-attempts">
-                    Max Attempts per Candidate
-                  </Label>
-                  <Input
-                    id="max-attempts"
-                    type="number"
-                    min="1"
-                    name="maxAttempts"
-                    value={examDetails.maxAttempts}
-                    onChange={handleInputChange}
-                    defaultValue="1"
-                  />
+                  ))}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setActiveTab("questions")}
-                >
-                  Back to Questions
-                </Button>
-                <Button
-                  onClick={handleCreateExam}
-                  className="bg-teal-600 hover:bg-teal-700"
-                >
-                  Create Exam
-                </Button>
-              </CardFooter>
             </Card>
-          </TabsContent>
-        </Tabs>
+          ))}
+
+        {/* Save Button */}
+        {examType && questions.length > 0 && (
+          <div className="flex justify-end pt-6">
+            <Button
+              onClick={handleSaveExam}
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Save Questions
+            </Button>
+          </div>
+        )}
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

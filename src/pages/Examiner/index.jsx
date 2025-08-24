@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,12 +20,30 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, FileCheck, FileX } from "lucide-react";
 import { examService } from "@/services/ExamServices";
+import axios from "axios";
 
 export default function TeacherReviewPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const submissions = examService.getSubmissions();
   const droneTypes = examService.getDroneTypes();
+  const [examSubmissions, setExamSubmissions] = useState([]);
+
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/teacher/fetchExamSubmissions"
+        );
+        console.log("Fetched submissions:", response.data);
+        setExamSubmissions(response.data);
+      } catch (error) {
+        console.error("Error fetching submissions:", error);
+      }
+    };
+
+    fetchSubmissions();
+  }, []);
 
   const filteredSubmissions = submissions.filter((submission) =>
     submission.candidateName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,8 +55,19 @@ export default function TeacherReviewPage() {
   };
 
   return (
-    <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-8">Review & Scoring</h1>
+    <div className="container py-8 px-8">
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold mb-8">Review & Scoring</h1>
+        <Button
+          asChild
+          size="sm"
+          className="bg-teal-600 hover:bg-teal-700 cursor-pointer"
+        >
+          <div onClick={() => navigate(`/examiner/addQuestion`)}>
+            Add Question
+          </div>
+        </Button>
+      </div>
 
       <Card className="mb-8">
         <CardHeader>
@@ -117,11 +146,80 @@ export default function TeacherReviewPage() {
                         <Button
                           asChild
                           size="sm"
-                          className="bg-teal-600 hover:bg-teal-700"
+                          className="bg-teal-600 hover:bg-teal-700 cursor-pointer"
                         >
                           <div
                             onClick={() =>
                               navigate(`/examiner/review/${submission.id}`)
+                            }
+                          >
+                            Review
+                          </div>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-8 text-muted-foreground"
+                    >
+                      No submissions found
+                    </TableCell>
+                  </TableRow>
+                )}
+                {examSubmissions.length > 0 ? (
+                  examSubmissions.map((submission) => (
+                    <TableRow key={submission._id}>
+                      <TableCell className="font-medium">
+                        {submission.candidateName}
+                      </TableCell>
+                      <TableCell>
+                        {submission?.submittedAt?.split("T")[0]}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className="bg-teal-100 text-teal-800 hover:bg-teal-100 dark:bg-teal-900 dark:text-teal-100">
+                          {getDroneTypeName(submission.droneType)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {submission?.telemetryUploaded ? (
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-100">
+                            Uploaded
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-muted-foreground"
+                          >
+                            Missing
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {submission?.scores ? (
+                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-100">
+                            Scored
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-amber-600 dark:text-amber-400"
+                          >
+                            Pending
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          asChild
+                          size="sm"
+                          className="bg-teal-600 hover:bg-teal-700"
+                        >
+                          <div
+                            onClick={() =>
+                              navigate(`/examiner/review/${submission._id}`)
                             }
                           >
                             Review
@@ -156,7 +254,8 @@ export default function TeacherReviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {submissions.filter((s) => !s.scores).length}
+              {filteredSubmissions.filter((s) => !s.scores).length +
+                examSubmissions.filter((s) => !s.scores).length}
             </div>
             <p className="text-xs text-muted-foreground">
               Submissions awaiting review

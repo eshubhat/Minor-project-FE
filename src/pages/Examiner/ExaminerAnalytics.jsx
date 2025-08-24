@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
 
         <TabsContent value="exam">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Score Distribution</CardTitle>
                 <CardDescription>
@@ -204,9 +204,9 @@ export default function AnalyticsPage() {
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Most Missed Questions</CardTitle>
                 <CardDescription>
@@ -229,7 +229,7 @@ export default function AnalyticsPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card>
               <CardHeader>

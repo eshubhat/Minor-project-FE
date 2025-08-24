@@ -94,11 +94,22 @@ export default function AnalyticsPage() {
           fetchStats.count += data.count;
           fetchStats.avgScore += data.avgScore;
           fetchStats.passRate += data.passRate;
-          fetchStats.maxScore += data.maxScore;
-          fetchStats.minScore += data.minScore;
+          if (data.maxScore > fetchStats.maxScore)
+            fetchStats.maxScore += data.maxScore;
+          if (data.minScore < fetchStats.minScore || fetchStats.minScore === 0)
+            fetchStats.minScore += data.minScore;
           fetchStats.failedCount += data.failedCount;
           fetchStats.passedCount += data.passedCount;
         });
+
+        console.log("fetchStats", data.length, fetchStats);
+
+        fetchStats.avgScore /= [data.length || 1];
+        fetchStats.passRate /= [data.length || 1];
+        fetchStats.failedCount;
+        fetchStats.passedCount;
+
+        console.log("fetchStats", fetchStats);
         setStats(fetchStats);
       } catch (err) {
         console.error("Failed to fetch drone analytics:", err);
@@ -159,7 +170,7 @@ export default function AnalyticsPage() {
   //   });
 
   return (
-    <div className="container py-8">
+    <div className="container py-8 px-8">
       <h1 className="text-3xl font-bold mb-8">Analytics Dashboard</h1>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -220,7 +231,7 @@ export default function AnalyticsPage() {
             <CardTitle className="text-sm font-medium">Average Score</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.avgScore}%</div>
+            <div className="text-2xl font-bold">{stats?.avgScore.toFixed(2)}%</div>
           </CardContent>
         </Card>
 
@@ -233,7 +244,7 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Telemetry Success
@@ -244,7 +255,7 @@ export default function AnalyticsPage() {
               {Math.round(analytics.telemetry.averageSuccessRate)}%
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <Tabs defaultValue="exam" className="space-y-4">
@@ -256,7 +267,7 @@ export default function AnalyticsPage() {
 
         <TabsContent value="exam">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Score Distribution</CardTitle>
                 <CardDescription>
@@ -290,9 +301,9 @@ export default function AnalyticsPage() {
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Most Missed Questions</CardTitle>
                 <CardDescription>
@@ -315,7 +326,7 @@ export default function AnalyticsPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
-            </Card>
+            </Card> */}
 
             <Card>
               <CardHeader>
@@ -328,7 +339,7 @@ export default function AnalyticsPage() {
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Highest Score</span>
                       <span className="text-sm font-medium">
-                        {stats?.maxScore}%
+                        {stats?.maxScore}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
@@ -343,7 +354,7 @@ export default function AnalyticsPage() {
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Average Score</span>
                       <span className="text-sm font-medium">
-                        {stats?.avgScore}%
+                        {stats?.avgScore?.toFixed(2)}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
@@ -358,7 +369,7 @@ export default function AnalyticsPage() {
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Lowest Score</span>
                       <span className="text-sm font-medium">
-                        {stats?.minScore}%
+                        {stats?.minScore}
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">

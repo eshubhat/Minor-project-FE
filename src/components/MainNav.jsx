@@ -17,19 +17,19 @@ export function MainNav() {
         <nav className="hidden md:flex gap-6">
           <div
             onClick={() => navigate("/")}
-            className="flex items-center text-sm font-medium text-muted-foreground"
+            className="flex items-center text-sm font-medium text-muted-foreground cursor-pointer hover:text-teal-600"
           >
             Candidate
           </div>
           <div
             onClick={() => navigate("/")}
-            className="flex items-center text-sm font-medium text-muted-foreground"
+            className="flex items-center text-sm font-medium text-muted-foreground cursor-pointer hover:text-teal-600"
           >
             Review
           </div>
           <div
             onClick={() => navigate("/")}
-            className="flex items-center text-sm font-medium text-muted-foreground"
+            className="flex items-center text-sm font-medium text-muted-foreground cursor-pointer hover:text-teal-600"
           >
             Analytics
           </div>
@@ -37,7 +37,7 @@ export function MainNav() {
       </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />
-        <Button asChild className="hidden md:flex">
+        <Button asChild className="hidden md:flex cursor-pointer">
           <div onClick={() => navigate("/")}>Login</div>
         </Button>
       </div>
