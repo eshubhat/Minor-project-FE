@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.jsx";
 import {
   Card,
   CardContent,
@@ -7,10 +7,10 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/card.jsx";
+import { Progress } from "@/components/ui/progress.jsx";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.jsx";
+import { Label } from "@/components/ui/label.jsx";
 import {
   CheckCircle,
   AlertCircle,

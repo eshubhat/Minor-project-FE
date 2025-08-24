@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx";
+import { Button } from "@/components/ui/button.jsx";
 import {
   DropdownMenu,
   DropdownMenuContent,

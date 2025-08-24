@@ -5,12 +5,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card.jsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx";
+import { Slider } from "@/components/ui/slider.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.jsx";
 
 // Mock telemetry data for different drone types
 const mockTelemetryData = {

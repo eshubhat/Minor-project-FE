@@ -21,8 +21,6 @@ import {
   Quaternion,
   SampledProperty,
   IonResource,
-  Transforms,
-  Matrix4,
 } from "cesium";
 import Papa from "papaparse";
 
@@ -46,10 +44,10 @@ const DronePathCesium = () => {
     if (CESIUM_ION_TOKEN) {
       Ion.defaultAccessToken = CESIUM_ION_TOKEN;
     }
-    
+
     // Preload Cesium assets
     Ion.preload();
-    
+
     // Load the drone model from Cesium Ion
     async function loadDroneModel() {
       try {
@@ -63,7 +61,7 @@ const DronePathCesium = () => {
         setIsLoading(false);
       }
     }
-    
+
     loadDroneModel();
   }, []);
 
@@ -107,53 +105,57 @@ const DronePathCesium = () => {
     for (let i = 0; i < positions.length - 1; i++) {
       const currentPosition = positions[i];
       const nextPosition = positions[i + 1];
-      
+
       // Calculate direction
       const direction = Cartesian3.subtract(
-        nextPosition, 
-        currentPosition, 
+        nextPosition,
+        currentPosition,
         new Cartesian3()
       );
       Cartesian3.normalize(direction, direction);
-      
+
       // Create a heading/pitch/roll
       const hpr = new HeadingPitchRoll();
-      
+
       // Calculate heading (yaw)
       hpr.heading = Math.atan2(direction.y, direction.x);
-      
+
       // Calculate pitch
       const horizontalDistance = Math.sqrt(
         direction.x * direction.x + direction.y * direction.y
       );
       hpr.pitch = Math.atan2(direction.z, horizontalDistance);
-      
+
       // Convert to quaternion
       const quaternion = Quaternion.fromHeadingPitchRoll(hpr);
-      
+
       // Add to sampled property
       const time = JulianDate.addSeconds(start, i * 5, new JulianDate());
       orientationProperty.addSample(time, quaternion);
     }
-    
+
     // Add the final orientation
     if (positions.length > 1) {
       const time = JulianDate.addSeconds(
-        start, 
-        (positions.length - 1) * 5, 
+        start,
+        (positions.length - 1) * 5,
         new JulianDate()
       );
-      
+
       // Use the last computed quaternion
       const lastQuaternion = orientationProperty.getValue(
-        JulianDate.addSeconds(start, (positions.length - 2) * 5, new JulianDate())
+        JulianDate.addSeconds(
+          start,
+          (positions.length - 2) * 5,
+          new JulianDate()
+        )
       );
-      
+
       if (lastQuaternion) {
         orientationProperty.addSample(time, lastQuaternion);
       }
     }
-    
+
     return orientationProperty;
   };
 
@@ -171,7 +173,7 @@ const DronePathCesium = () => {
           longitude: row.longitude,
           altitude: row.altitude || 100, // Default altitude if not provided
         }));
-        
+
         setPositions(formatted);
         const posProperty = convertToSampledPosition(formatted);
         setSampledPosition(posProperty);
@@ -187,16 +189,21 @@ const DronePathCesium = () => {
     setOrientationProperty(computeOrientation(dummyPath));
   }, []);
 
-  const cartesianPositions = positions.map(({ latitude, longitude, altitude }) =>
-    Cartesian3.fromDegrees(
-      parseFloat(longitude),
-      parseFloat(latitude),
-      parseFloat(altitude || 0)
-    )
+  const cartesianPositions = positions.map(
+    ({ latitude, longitude, altitude }) =>
+      Cartesian3.fromDegrees(
+        parseFloat(longitude),
+        parseFloat(latitude),
+        parseFloat(altitude || 0)
+      )
   );
 
   const startTime = JulianDate.now();
-  const stopTime = JulianDate.addSeconds(startTime, (positions.length - 1) * 5, new JulianDate());
+  const stopTime = JulianDate.addSeconds(
+    startTime,
+    (positions.length - 1) * 5,
+    new JulianDate()
+  );
 
   return (
     <div style={{ height: "100vh" }}>
@@ -208,16 +215,18 @@ const DronePathCesium = () => {
         style={{ position: "absolute", zIndex: 1000, padding: 10 }}
       />
       {isLoading && (
-        <div style={{ 
-          position: "absolute", 
-          zIndex: 1000, 
-          top: 10, 
-          right: 10,
-          background: "rgba(0,0,0,0.7)",
-          color: "white",
-          padding: "8px 12px",
-          borderRadius: 4
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 1000,
+            top: 10,
+            right: 10,
+            background: "rgba(0,0,0,0.7)",
+            color: "white",
+            padding: "8px 12px",
+            borderRadius: 4,
+          }}
+        >
           Loading drone model...
         </div>
       )}
@@ -233,7 +242,7 @@ const DronePathCesium = () => {
         fullscreenButton={false}
         terrainProvider={createWorldTerrainAsync({
           requestVertexNormals: true,
-          requestWaterMask: true
+          requestWaterMask: true,
         })}
         scene3DOnly={true}
         clock={{
@@ -246,12 +255,12 @@ const DronePathCesium = () => {
         }}
       >
         {cartesianPositions.length > 0 && (
-          <CameraFlyTo 
+          <CameraFlyTo
             destination={Cartesian3.fromDegrees(
               positions[0].longitude,
               positions[0].latitude,
               positions[0].altitude + 500 // Position camera 500m above the starting point
-            )} 
+            )}
             duration={2}
           />
         )}
@@ -269,7 +278,11 @@ const DronePathCesium = () => {
 
         {/* Markers at waypoints */}
         {cartesianPositions.map((pos, index) => (
-          <Entity key={`waypoint-${index}`} position={pos} name={`Waypoint ${index + 1}`}>
+          <Entity
+            key={`waypoint-${index}`}
+            position={pos}
+            name={`Waypoint ${index + 1}`}
+          >
             <PointGraphics
               pixelSize={10}
               color={Color.YELLOW}
@@ -281,7 +294,11 @@ const DronePathCesium = () => {
 
         {/* 3D Drone Model */}
         {sampledPosition && orientationProperty && droneModelResource && (
-          <Entity position={sampledPosition} orientation={orientationProperty} name="Drone">
+          <Entity
+            position={sampledPosition}
+            orientation={orientationProperty}
+            name="Drone"
+          >
             <ModelGraphics
               uri={droneModelResource}
               minimumPixelSize={64}
@@ -291,10 +308,14 @@ const DronePathCesium = () => {
             />
           </Entity>
         )}
-        
+
         {/* Fallback drone if the model fails to load */}
         {sampledPosition && orientationProperty && !droneModelResource && (
-          <Entity position={sampledPosition} orientation={orientationProperty} name="Drone">
+          <Entity
+            position={sampledPosition}
+            orientation={orientationProperty}
+            name="Drone"
+          >
             <PointGraphics
               pixelSize={15}
               color={Color.RED}

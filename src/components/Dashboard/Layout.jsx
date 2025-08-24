@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { BookOpen, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.jsx";
 import ThemeToggle from "../ThemeToggle";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { DashboardNav } from "./DashboaradNav";
-import { UserNav } from "./UserNav";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet.jsx";
+import { DashboardNav } from "./DashboaradNav.jsx";
+import { UserNav } from "./UserNav.jsx";
 
 export function DashboardLayout({ children, role = "examiner" }) {
   const [open, setOpen] = useState(false);

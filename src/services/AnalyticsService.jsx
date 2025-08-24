@@ -1,5 +1,5 @@
-import { examService } from "./ExamServices";
-import { telemetryService } from "./TelemetryService";
+import { examService } from "./ExamServices.jsx";
+import { telemetryService } from "./TelemetryService.jsx";
 
 export const analyticsService = {
   getExamAnalytics: () => {

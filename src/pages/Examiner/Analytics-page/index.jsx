@@ -5,16 +5,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/card.jsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/select.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
 import {
   BarChart,
   Bar,
@@ -28,8 +28,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { analyticsService } from "@/services/AnalyticsService";
-import { examService } from "@/services/ExamServices";
+import { analyticsService } from "@/services/AnalyticsService.jsx";
+import { examService } from "@/services/ExamServices.jsx";
 
 export default function AnalyticsPage() {
   const [dateFilter, setDateFilter] = useState("all");

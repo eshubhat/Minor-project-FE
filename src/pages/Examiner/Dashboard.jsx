@@ -1,11 +1,11 @@
-import { DashboardLayout } from "@/components/dashboard/layout";
+import { DashboardLayout } from "@/components/dashboard/layout.jsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card.jsx";
 import { FileText, Users, CheckCircle, Clock } from "lucide-react";
 
 export default function ExaminerDashboardPage() {

@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/dashboard/layout";
+import { DashboardLayout } from "@/components/dashboard/layout.jsx";
 import {
   Card,
   CardContent,
@@ -6,14 +6,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select.jsx";
 import {
   ResponsiveContainer,
   BarChart,

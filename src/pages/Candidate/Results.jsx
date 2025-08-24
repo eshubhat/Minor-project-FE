@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { DashboardLayout } from "../../components/Dashboard/Layout";
+import { DashboardLayout } from "../../components/Dashboard/Layout.jsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/card.jsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/select.jsx";
+import { Button } from "@/components/ui/button.jsx";
 import {
   ResponsiveContainer,
   LineChart,

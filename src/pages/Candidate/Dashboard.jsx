@@ -1,13 +1,13 @@
-import { DashboardLayout } from "@/components/dashboard/layout";
+import { DashboardLayout } from "@/components/dashboard/layout.jsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card.jsx";
+import { Button } from "@/components/ui/button.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
 import { BookOpen, Clock, FileCheck, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 

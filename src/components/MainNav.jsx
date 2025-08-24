@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Activity } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.jsx";
 import ThemeToggle from "./ThemeToggle";
 
 export function MainNav() {

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.jsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/card.jsx";
+import { Input } from "@/components/ui/input.jsx";
 import {
   Table,
   TableBody,
@@ -16,10 +16,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/table.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
 import { Search, FileCheck, FileX } from "lucide-react";
-import { examService } from "@/services/ExamServices";
+import { examService } from "@/services/ExamServices.jsx";
 
 export default function ExaminerReviewPage() {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.jsx";
 import {
   Card,
   CardContent,
@@ -8,11 +8,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/card.jsx";
+import { Input } from "@/components/ui/input.jsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.jsx";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.jsx";
+import { Badge } from "@/components/ui/badge.jsx";
 import {
   Table,
   TableBody,
@@ -20,10 +20,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table.jsx";
 import { CheckCircle, AlertCircle, ArrowLeft } from "lucide-react";
-import { examService } from "@/services/ExamServices";
-import { telemetryService } from "@/services/TelemetryService";
+import { examService } from "@/services/ExamServices.jsx";
+import { telemetryService } from "@/services/TelemetryService.jsx";
 
 export default function ReviewSubmissionPage({ params }) {
   const navigate = useNavigate();
