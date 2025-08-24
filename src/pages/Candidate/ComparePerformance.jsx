@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DashboardLayout } from "@/components/Dashboard/layout.jsx";
+import { DashboardLayout } from "@/components/Dashboard/Layout.jsx";
 import {
   Card,
   CardContent,
