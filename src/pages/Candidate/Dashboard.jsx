@@ -1,4 +1,4 @@
-import { DashboardLayout } from "@/components/dashboard/layout.jsx";
+import { DashboardLayout } from "@/components/Dashboard/Layout.jsx";
 import {
   Card,
   CardContent,

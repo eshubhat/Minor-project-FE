@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { DashboardLayout } from "@/components/dashboard/layout.jsx";
+import { DashboardLayout } from "@/components/Dashboard/Layout.jsx";
 import {
   Card,
   CardContent,
